@@ -1,4 +1,3 @@
-```groovy
 pipeline {
     agent any
 
@@ -31,13 +30,8 @@ pipeline {
                         pwd
                         ls -la
 
-                        echo "Checking package.json..."
                         test -f package.json
-
-                        echo "Checking package-lock.json..."
                         test -f package-lock.json
-
-                        echo "Checking .env..."
                         test -f .env
 
                         echo "React project found successfully."
@@ -85,7 +79,6 @@ pipeline {
                         test -f build/index.html
 
                         echo "Build folder verified."
-
                         ls -lah build/
                     '''
                 }
@@ -100,13 +93,9 @@ pipeline {
                         echo 'Deploying React application to Nginx...'
                         echo '=========================================='
 
-                        echo "Removing old application files..."
                         sudo rm -rf /usr/share/nginx/html/*
-
-                        echo "Copying new React build..."
                         sudo cp -r build/* /usr/share/nginx/html/
 
-                        echo "Restarting Nginx..."
                         sudo systemctl restart nginx
 
                         echo "Checking Nginx status..."
@@ -122,7 +111,6 @@ pipeline {
     }
 
     post {
-
         success {
             echo '=========================================='
             echo '       TRADING UI DEPLOYMENT SUCCESS      '
@@ -144,4 +132,3 @@ pipeline {
         }
     }
 }
-```
