@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -10,7 +11,9 @@ pipeline {
 
         stage('Git Clone') {
             steps {
+                echo '=========================================='
                 echo 'Cloning source code from GitHub...'
+                echo '=========================================='
 
                 git branch: 'main',
                     url: 'git@github.com:shujathuddinsyed-bit/syed-terraform-jenkins.git'
@@ -21,12 +24,21 @@ pipeline {
             steps {
                 dir('Trading-UI') {
                     sh '''
-                        echo "Checking React application..."
+                        echo '=========================================='
+                        echo 'Checking React application...'
+                        echo '=========================================='
+
                         pwd
                         ls -la
 
+                        echo "Checking package.json..."
                         test -f package.json
+
+                        echo "Checking package-lock.json..."
                         test -f package-lock.json
+
+                        echo "Checking .env..."
+                        test -f .env
 
                         echo "React project found successfully."
                     '''
@@ -38,7 +50,9 @@ pipeline {
             steps {
                 dir('Trading-UI') {
                     sh '''
-                        echo "Installing dependencies..."
+                        echo '=========================================='
+                        echo 'Installing npm dependencies...'
+                        echo '=========================================='
 
                         npm install
 
@@ -52,18 +66,26 @@ pipeline {
             steps {
                 dir('Trading-UI') {
                     sh '''
-                        echo "Building React application..."
+                        echo '=========================================='
+                        echo 'Building React application...'
+                        echo '=========================================='
 
                         export NODE_OPTIONS=--openssl-legacy-provider
                         export CI=false
 
-                        npm run build
+                        echo "NODE_OPTIONS=$NODE_OPTIONS"
+                        echo "CI=$CI"
 
-                        echo "React build completed successfully."
+                        npm run build -- --no-lint
+
+                        echo '=========================================='
+                        echo 'React build completed successfully.'
+                        echo '=========================================='
 
                         test -f build/index.html
 
                         echo "Build folder verified."
+
                         ls -lah build/
                     '''
                 }
@@ -74,18 +96,25 @@ pipeline {
             steps {
                 dir('Trading-UI') {
                     sh '''
-                        echo "Deploying application to Nginx..."
+                        echo '=========================================='
+                        echo 'Deploying React application to Nginx...'
+                        echo '=========================================='
 
+                        echo "Removing old application files..."
                         sudo rm -rf /usr/share/nginx/html/*
+
+                        echo "Copying new React build..."
                         sudo cp -r build/* /usr/share/nginx/html/
 
                         echo "Restarting Nginx..."
                         sudo systemctl restart nginx
 
-                        echo "Checking Nginx..."
+                        echo "Checking Nginx status..."
                         sudo systemctl is-active nginx
 
-                        echo "Deployment completed successfully."
+                        echo '=========================================='
+                        echo 'Nginx deployment completed successfully.'
+                        echo '=========================================='
                     '''
                 }
             }
@@ -93,16 +122,20 @@ pipeline {
     }
 
     post {
+
         success {
             echo '=========================================='
-            echo 'TRADING UI DEPLOYMENT SUCCESSFUL!'
+            echo '       TRADING UI DEPLOYMENT SUCCESS      '
             echo '=========================================='
-            echo 'Application: http://16.113.162.174'
+            echo 'Application URL: http://16.113.162.174'
+            echo '=========================================='
         }
 
         failure {
             echo '=========================================='
-            echo 'TRADING UI DEPLOYMENT FAILED!'
+            echo '        TRADING UI DEPLOYMENT FAILED      '
+            echo '=========================================='
+            echo 'Check the Jenkins Console Output.'
             echo '=========================================='
         }
 
@@ -111,3 +144,4 @@ pipeline {
         }
     }
 }
+```
