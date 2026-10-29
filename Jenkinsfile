@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         NODE_OPTIONS = '--openssl-legacy-provider'
+        CI = 'false'
     }
 
     stages {
@@ -37,8 +38,10 @@ pipeline {
             steps {
                 dir('Trading-UI') {
                     sh '''
-                        echo "Installing npm dependencies..."
+                        echo "Installing dependencies..."
+
                         npm install
+
                         echo "Dependencies installed successfully."
                     '''
                 }
@@ -49,14 +52,18 @@ pipeline {
             steps {
                 dir('Trading-UI') {
                     sh '''
-                        echo "Starting React production build..."
+                        echo "Building React application..."
 
                         export NODE_OPTIONS=--openssl-legacy-provider
+                        export CI=false
 
                         npm run build
 
-                        echo "React production build completed."
+                        echo "React build completed successfully."
 
+                        test -f build/index.html
+
+                        echo "Build folder verified."
                         ls -lah build/
                     '''
                 }
@@ -67,14 +74,15 @@ pipeline {
             steps {
                 dir('Trading-UI') {
                     sh '''
-                        echo "Deploying React application to Nginx..."
+                        echo "Deploying application to Nginx..."
 
                         sudo rm -rf /usr/share/nginx/html/*
-
                         sudo cp -r build/* /usr/share/nginx/html/
 
+                        echo "Restarting Nginx..."
                         sudo systemctl restart nginx
 
+                        echo "Checking Nginx..."
                         sudo systemctl is-active nginx
 
                         echo "Deployment completed successfully."
@@ -87,15 +95,14 @@ pipeline {
     post {
         success {
             echo '=========================================='
-            echo 'Trading UI deployment SUCCESSFUL!'
-            echo 'Application: http://16.113.162.174'
+            echo 'TRADING UI DEPLOYMENT SUCCESSFUL!'
             echo '=========================================='
+            echo 'Application: http://16.113.162.174'
         }
 
         failure {
             echo '=========================================='
-            echo 'Trading UI deployment FAILED!'
-            echo 'Check Jenkins console output.'
+            echo 'TRADING UI DEPLOYMENT FAILED!'
             echo '=========================================='
         }
 
