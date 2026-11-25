@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trading-ui
+  namespace: trading-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: trading-ui
+  template:
+    metadata:
+      labels:
+        app: trading-ui
+    spec:
+      containers:
+      - name: trading-ui
+        image: 165223368797.dkr.ecr.ap-south-2.amazonaws.com/syed-trading-ui:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
